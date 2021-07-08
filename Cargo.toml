@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 clap = { git = "https://github.com/clap-rs/clap", rev = "a11ca85e8fd401e07c8330980d0af090a3d35d03"}
 rustyline = "8.2.0"
-sirix-rust-client = { path = "../sirix-rust-client", features = ["sync"] }
+sirix-rust-client = { git = "https://github.com/sirixdb/sirix-rust-client", rev = "e9e590332c58452bac1ac41f0f47f4065a5784c1", features = ["sync"] }
 ureq = "2.1.1"
 serde_json = "1.0.64"
 minidom = "0.13.0"

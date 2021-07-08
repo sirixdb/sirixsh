@@ -590,6 +590,7 @@ dependencies = [
 [[package]]
 name = "sirix-rust-client"
 version = "0.1.0"
+source = "git+https://github.com/sirixdb/sirix-rust-client?rev=e9e590332c58452bac1ac41f0f47f4065a5784c1#e9e590332c58452bac1ac41f0f47f4065a5784c1"
 dependencies = [
  "bytes",
  "log",
