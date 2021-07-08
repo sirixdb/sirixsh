@@ -1,0 +1,16 @@
+[package]
+name = "sirixsh"
+version = "0.1.0"
+authors = ["Moshe Uminer <47164590+mosheduminer@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { git = "https://github.com/clap-rs/clap", rev = "a11ca85e8fd401e07c8330980d0af090a3d35d03"}
+rustyline = "8.2.0"
+sirix-rust-client = { path = "../sirix-rust-client", features = ["sync"] }
+ureq = "2.1.1"
+serde_json = "1.0.64"
+minidom = "0.13.0"
+quick-xml = { version = "0.22.0", features = ["serialize"]}
