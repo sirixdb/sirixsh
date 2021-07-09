@@ -1,7 +1,4 @@
-use sirix_rust_client::{
-    synchronous::resource::Resource,
-    types::{Json, ReadArgs, RevisionArg, SingleRevision, TwoRevisions, Xml},
-};
+use sirix_rust_client::{synchronous::resource::Resource, types::{Json, MetadataType, ReadArgs, RevisionArg, SingleRevision, TwoRevisions, Xml}};
 
 use crate::parsers::read::RevisionType;
 
@@ -14,6 +11,7 @@ pub fn read_json_resource(
     max_level: Option<u64>,
     top_level_limit: Option<u64>,
     top_level_skip_last_node: Option<u64>,
+    metadata: Option<MetadataType>,
 ) -> JsonResponse {
     let revision = match revision {
         Some(rev) => match rev {
@@ -35,13 +33,22 @@ pub fn read_json_resource(
         },
         None => None,
     };
-    let response = resource.read(ReadArgs {
-        node_id,
-        revision,
-        max_level,
-        top_level_limit,
-        top_level_skip_last_node,
-    });
+    let response = match metadata {
+        Some(meta_type) => resource.read_with_metadata_raw(meta_type, ReadArgs {
+            node_id,
+            revision,
+            max_level,
+            top_level_limit,
+            top_level_skip_last_node,
+        }),
+        None => resource.read(ReadArgs {
+            node_id,
+            revision,
+            max_level,
+            top_level_limit,
+            top_level_skip_last_node,
+        })
+    };
     match response {
         Ok(response) => JsonResponse::Ok(response.body),
         Err(err) => JsonResponse::Err(err),

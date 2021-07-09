@@ -6,7 +6,7 @@ pub struct ReadOpts {
     #[clap(short, long)]
     pub nodekey: Option<u128>,
     /// The maximum depth until which to read - defaults to maximum.
-    #[clap(short, long)]
+    #[clap(short('j'), long)]
     pub max_depth: Option<u64>,
     /// The maximum number of top level nodes to return - defaults to all.
     #[clap(short, long)]
@@ -16,14 +16,18 @@ pub struct ReadOpts {
     pub skip: Option<u64>,
     #[clap(subcommand)]
     pub revision: Option<RevisionType>,
-    /// Optionally explicity set the database to use. Requires --resource.
-    #[clap(long, short, requires("resource"))]
+    /// Optionally explicity set the database to use. Requires --type.
+    #[clap(long, short, requires("type"))]
     pub database: Option<String>,
     /// Optionally explicity set the resource to use. Requires --database.
     #[clap(long, short, requires("database"))]
     pub resource: Option<String>,
-    #[clap(long, short, alias="type", possible_values = &["json", "xml"])]
+    /// Optionally explicitly set the type of database/resource to use.
+    #[clap(long, short, possible_values = &["json", "xml"], requires("database"))]
     pub type_: Option<String>,
+    /// Optionally get a metadata response instead of plain data.
+    #[clap(long, short, min_values = 0, require_equals=true, possible_values = &["all", "key", "key-and-child"], default_missing_value("key-and-child"))]
+    pub metadata: Option<String>,
 }
 
 impl std::fmt::Display for ReadOpts {

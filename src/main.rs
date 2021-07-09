@@ -7,7 +7,7 @@ use http::{read_json_resource, read_xml_resource, create_sirix};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 use serde_json::to_writer_pretty;
-use sirix_rust_client::synchronous::sirix::Sirix;
+use sirix_rust_client::{synchronous::sirix::Sirix, types::MetadataType};
 
 use std::{error, fmt};
 
@@ -34,6 +34,15 @@ impl fmt::Display for Commands {
 fn execute_command(command: Commands, sirix: Sirix) {
     match command {
         Commands::Read(opts) => {
+            let metadata = match opts.metadata {
+                Some(metadata) => match metadata.as_str() {
+                    "all" => Some(MetadataType::All),
+                    "key-and-child" => Some(MetadataType::KeyAndChild),
+                    "key" => Some(MetadataType::Key),
+                    _ => None
+                },
+                None => None,
+            };
             match opts.type_.unwrap().as_str() {
                 "json" => {
                     let resource = sirix
@@ -46,6 +55,7 @@ fn execute_command(command: Commands, sirix: Sirix) {
                         opts.max_depth,
                         opts.limit,
                         opts.skip,
+                        metadata
                     );
                     match response {
                         JsonResponse::Ok(response) => {
