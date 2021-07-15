@@ -41,7 +41,7 @@ pub fn read_json_resource(
             top_level_limit,
             top_level_skip_last_node,
         }),
-        None => resource.read(ReadArgs {
+        None => resource.read_raw(ReadArgs {
             node_id,
             revision,
             max_level,
@@ -83,7 +83,7 @@ pub fn read_xml_resource(
         },
         None => None,
     };
-    let response = resource.read(ReadArgs {
+    let response = resource.read_string(ReadArgs {
         node_id,
         revision,
         max_level,

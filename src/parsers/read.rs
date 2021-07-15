@@ -30,6 +30,7 @@ pub struct ReadOpts {
     pub metadata: Option<String>,
 }
 
+// TODO handle other fields as well
 impl std::fmt::Display for ReadOpts {
     fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
         write!(
