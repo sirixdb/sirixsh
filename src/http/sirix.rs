@@ -1,8 +1,7 @@
-use sirix_rust_client::synchronous::sirix::Sirix;
 use sirix_rust_client::synchronous::auth::auth;
+use sirix_rust_client::synchronous::sirix::Sirix;
 
 use super::types::JsonResponse;
-
 
 pub fn create_sirix(base_url: &str, username: &str, password: &str) -> Sirix {
     let agent = ureq::agent();

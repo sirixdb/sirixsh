@@ -20,12 +20,10 @@ impl std::fmt::Display for InfoOpts {
     fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
         match self.database.to_owned() {
             Some(database) => write!(f, "database: {}", database),
-            None => {
-                match self.with_resources {
-                    Some(_) => write!(f, "server with_resources"),
-                    None => write!(f, "server")
-                }
-            }
+            None => match self.with_resources {
+                Some(_) => write!(f, "server with_resources"),
+                None => write!(f, "server"),
+            },
         }
     }
 }

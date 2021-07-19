@@ -1,4 +1,7 @@
-use sirix_rust_client::{synchronous::resource::Resource, types::{Json, MetadataType, ReadArgs, RevisionArg, SingleRevision, TwoRevisions, Xml}};
+use sirix_rust_client::{
+    synchronous::resource::Resource,
+    types::{Json, MetadataType, ReadArgs, RevisionArg, SingleRevision, TwoRevisions, Xml},
+};
 
 use crate::parsers::read::RevisionType;
 
@@ -16,38 +19,44 @@ pub fn read_json_resource(
     let revision = match revision {
         Some(rev) => match rev {
             RevisionType::Revision { number, end_number } => match end_number {
-                Some(end_number) => {
-                    Some(RevisionArg::TwoRevisions(TwoRevisions::Number(number, end_number)))
-                }
+                Some(end_number) => Some(RevisionArg::TwoRevisions(TwoRevisions::Number(
+                    number, end_number,
+                ))),
                 None => Some(RevisionArg::SingleRevision(SingleRevision::Number(number))),
             },
             RevisionType::Timestamp {
                 timestamp,
                 end_timestamp,
             } => match end_timestamp {
-                Some(end_timestamp) => {
-                    Some(RevisionArg::TwoRevisions(TwoRevisions::Timestamp(timestamp, end_timestamp)))
-                }
-                None => Some(RevisionArg::SingleRevision(SingleRevision::Timestamp(timestamp))),
+                Some(end_timestamp) => Some(RevisionArg::TwoRevisions(TwoRevisions::Timestamp(
+                    timestamp,
+                    end_timestamp,
+                ))),
+                None => Some(RevisionArg::SingleRevision(SingleRevision::Timestamp(
+                    timestamp,
+                ))),
             },
         },
         None => None,
     };
     let response = match metadata {
-        Some(meta_type) => resource.read_with_metadata_raw(meta_type, ReadArgs {
-            node_id,
-            revision,
-            max_level,
-            top_level_limit,
-            top_level_skip_last_node,
-        }),
+        Some(meta_type) => resource.read_with_metadata_raw(
+            meta_type,
+            ReadArgs {
+                node_id,
+                revision,
+                max_level,
+                top_level_limit,
+                top_level_skip_last_node,
+            },
+        ),
         None => resource.read_raw(ReadArgs {
             node_id,
             revision,
             max_level,
             top_level_limit,
             top_level_skip_last_node,
-        })
+        }),
     };
     match response {
         Ok(response) => JsonResponse::Ok(response.body),
@@ -66,19 +75,22 @@ pub fn read_xml_resource(
     let revision = match revision {
         Some(rev) => match rev {
             RevisionType::Revision { number, end_number } => match end_number {
-                Some(end_number) => {
-                    Some(RevisionArg::TwoRevisions(TwoRevisions::Number(number, end_number)))
-                }
+                Some(end_number) => Some(RevisionArg::TwoRevisions(TwoRevisions::Number(
+                    number, end_number,
+                ))),
                 None => Some(RevisionArg::SingleRevision(SingleRevision::Number(number))),
             },
             RevisionType::Timestamp {
                 timestamp,
                 end_timestamp,
             } => match end_timestamp {
-                Some(end_timestamp) => {
-                    Some(RevisionArg::TwoRevisions(TwoRevisions::Timestamp(timestamp, end_timestamp)))
-                }
-                None => Some(RevisionArg::SingleRevision(SingleRevision::Timestamp(timestamp))),
+                Some(end_timestamp) => Some(RevisionArg::TwoRevisions(TwoRevisions::Timestamp(
+                    timestamp,
+                    end_timestamp,
+                ))),
+                None => Some(RevisionArg::SingleRevision(SingleRevision::Timestamp(
+                    timestamp,
+                ))),
             },
         },
         None => None,

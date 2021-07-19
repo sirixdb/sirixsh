@@ -2,16 +2,22 @@ mod http;
 mod parsers;
 
 use clap::Clap;
-
-use http::{create_sirix, database::database_info_json, read_json_resource, read_xml_resource, sirix::{server_info, server_info_with_resources}};
+use http::{
+    create_sirix,
+    database::database_info_json,
+    read_json_resource, read_xml_resource,
+    sirix::{server_info, server_info_with_resources},
+};
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 use serde_json::to_writer_pretty;
 use sirix_rust_client::{synchronous::sirix::Sirix, types::MetadataType};
-
 use std::{error, fmt};
 
-use crate::http::{database_info_xml, handle_error, types::{JsonResponse, XmlResponse}};
+use crate::http::{
+    database_info_xml, handle_error,
+    types::{JsonResponse, XmlResponse},
+};
 
 #[derive(Clap, Debug)]
 #[clap(version = "0.1", author = "Moshe Uminer")]
@@ -109,7 +115,7 @@ fn execute_command(command: Commands, sirix: Sirix) {
                 "xml" => {
                     let database = sirix.xml_database(database_name);
                     handle_xml_response(database_info_xml(database))
-                },
+                }
                 _ => {
                     let database = sirix.json_database(database_name);
                     handle_json_response(database_info_json(database))

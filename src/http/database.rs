@@ -1,4 +1,7 @@
-use sirix_rust_client::{synchronous::database::Database, types::{Json, Xml}};
+use sirix_rust_client::{
+    synchronous::database::Database,
+    types::{Json, Xml},
+};
 
 use super::types::{JsonResponse, XmlResponse};
 

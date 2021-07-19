@@ -1,7 +1,7 @@
 pub mod delete;
-pub mod read;
 pub mod info;
+pub mod read;
 
 pub use delete::DeleteOpts;
-pub use read::ReadOpts;
 pub use info::InfoOpts;
+pub use read::ReadOpts;
