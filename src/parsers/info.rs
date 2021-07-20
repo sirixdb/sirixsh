@@ -3,11 +3,11 @@ use clap::Clap;
 #[derive(Clap, Debug)]
 pub struct InfoOpts {
     /// Read database info for the entire server.
-    #[clap(short, long)]
-    pub server: Option<bool>,
+    #[clap(short, long, takes_value = false)]
+    pub server: bool,
     /// Include resource info when reading info for the entire server.
-    #[clap(short, long, requires("server"))]
-    pub with_resources: Option<String>,
+    #[clap(short, long, takes_value = false, requires("server"))]
+    pub with_resources: bool,
     /// Read info for database.
     #[clap(short, long, conflicts_with("server"))]
     pub database: Option<String>,
@@ -21,8 +21,8 @@ impl std::fmt::Display for InfoOpts {
         match self.database.to_owned() {
             Some(database) => write!(f, "database: {}", database),
             None => match self.with_resources {
-                Some(_) => write!(f, "server with_resources"),
-                None => write!(f, "server"),
+                true => write!(f, "server with_resources"),
+                false => write!(f, "server"),
             },
         }
     }

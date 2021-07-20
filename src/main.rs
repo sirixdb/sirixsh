@@ -121,10 +121,9 @@ fn execute_command(command: Commands, sirix: Sirix) {
                     handle_json_response(database_info_json(database))
                 }
             },
-            // TODO use XML response if specified
             None => match opts.with_resources {
-                Some(_) => handle_json_response(server_info_with_resources(sirix)),
-                None => handle_json_response(server_info(sirix)),
+                true => handle_json_response(server_info_with_resources(sirix)),
+                false => handle_json_response(server_info(sirix)),
             },
         },
     }
