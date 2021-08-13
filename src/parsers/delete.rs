@@ -1,17 +1,29 @@
 use clap::Clap;
 
 #[derive(Clap, Debug)]
-pub enum DeleteOpts {
+pub struct DeleteOpts {
+    #[clap(subcommand)]
+    opts: DeleteOptsImpl,
+}
+
+impl std::fmt::Display for DeleteOpts {
+    fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
+        std::fmt::Display::fmt(&self.opts, f)
+    }
+}
+
+#[derive(Clap, Debug)]
+pub enum DeleteOptsImpl {
     #[clap(flatten)]
     Scope(DeleteScopeTypes),
     Node(DeleteNodeOpts),
 }
 
-impl std::fmt::Display for DeleteOpts {
+impl std::fmt::Display for DeleteOptsImpl {
     fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            DeleteOpts::Node(opts) => std::fmt::Display::fmt(&opts, f),
-            DeleteOpts::Scope(opts) => std::fmt::Display::fmt(&opts, f),
+            DeleteOptsImpl::Node(opts) => std::fmt::Display::fmt(&opts, f),
+            DeleteOptsImpl::Scope(opts) => std::fmt::Display::fmt(&opts, f),
         }
     }
 }
@@ -54,7 +66,19 @@ impl std::fmt::Display for DeleteNodeOpts {
 }
 
 #[derive(Clap, Debug)]
-pub enum DeleteContextScopes {
+pub struct DeleteContextScopes {
+    #[clap(subcommand)]
+    opts: DeleteContextScopesImpl,
+}
+
+impl std::fmt::Display for DeleteContextScopes {
+    fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
+        std::fmt::Display::fmt(&self.opts, f)
+    }
+}
+
+#[derive(Clap, Debug)]
+pub enum DeleteContextScopesImpl {
     /// delete all databases and their resources
     Server,
     /// delete the entire database in current context
@@ -63,12 +87,12 @@ pub enum DeleteContextScopes {
     Resource,
 }
 
-impl std::fmt::Display for DeleteContextScopes {
+impl std::fmt::Display for DeleteContextScopesImpl {
     fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::result::Result<(), std::fmt::Error> {
         match self {
-            DeleteContextScopes::Server => write!(f, "ServerContext"),
-            DeleteContextScopes::Database => write!(f, "DatabaseContext"),
-            DeleteContextScopes::Resource => write!(f, "ResourceContext"),
+            DeleteContextScopesImpl::Server => write!(f, "ServerContext"),
+            DeleteContextScopesImpl::Database => write!(f, "DatabaseContext"),
+            DeleteContextScopesImpl::Resource => write!(f, "ResourceContext"),
         }
     }
 }
