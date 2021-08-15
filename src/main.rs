@@ -3,25 +3,31 @@ mod parsers;
 
 use clap::Clap;
 use http::{
-    create_sirix,
-    database::database_info_json,
-    read_json_resource, read_xml_resource,
+    create_sirix, database_delete, database_info_json, read_json_resource, read_xml_resource,
+    server_delete,
     sirix::{server_info, server_info_with_resources},
 };
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 use serde_json::to_writer_pretty;
-use sirix_rust_client::{synchronous::sirix::Sirix, types::MetadataType};
+use sirix_rust_client::{
+    synchronous::sirix::Sirix,
+    types::{DbType, Json, MetadataType, Xml},
+};
 use std::{error, fmt};
 
-use crate::http::{
-    database_info_xml, handle_error,
-    types::{JsonResponse, XmlResponse},
+use crate::{
+    http::{
+        database_info_xml, handle_error,
+        types::{JsonResponse, XmlResponse},
+    },
+    parsers::delete::{DeleteOptsImpl, DeleteScopeTypes},
 };
 
 #[derive(Clap, Debug)]
 #[clap(version = "0.1", author = "Moshe Uminer")]
 enum Commands {
+    Context(parsers::ContextOpts),
     Delete(parsers::DeleteOpts),
     Read(parsers::ReadOpts),
     Info(parsers::InfoOpts),
@@ -32,6 +38,7 @@ impl error::Error for Commands {}
 impl fmt::Display for Commands {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Commands::Context(opts) => write!(f, "context {:?}", opts),
             Commands::Delete(opts) => write!(f, "delete {}", opts),
             Commands::Read(opts) => write!(f, "read {}", opts),
             Commands::Info(opts) => write!(f, "info {}", opts),
@@ -61,8 +68,54 @@ fn handle_xml_response(response: XmlResponse) {
     }
 }
 
-fn execute_command(command: Commands, sirix: Sirix) {
+fn execute_command(command: Commands, sirix: Sirix, context: &mut parsers::ContextStruct) {
     match command {
+        Commands::Context(opts) => match opts.opts {
+            parsers::ContextOptsImpl::Server => {
+                context.context =
+                    parsers::Context::Server(parsers::get_server_string(context.context.clone()));
+            }
+            parsers::ContextOptsImpl::Database(opts) => {
+                context.context = parsers::Context::Database {
+                    server: parsers::get_server_string(context.context.clone()),
+                    database: opts.database,
+                    db_type: match opts.db_type.as_str() {
+                        "json" => DbType::Json(Json),
+                        _ => DbType::XML(Xml),
+                    },
+                }
+            }
+            parsers::ContextOptsImpl::DatabaseAndResource(opts) => {
+                context.context = parsers::Context::Resource {
+                    server: parsers::get_server_string(context.context.clone()),
+                    database: opts.database,
+                    db_type: match opts.db_type.as_str() {
+                        "json" => DbType::Json(Json),
+                        _ => DbType::XML(Xml),
+                    },
+                    resource: opts.resource,
+                }
+            }
+            parsers::ContextOptsImpl::Resource(opts) => {
+                if let parsers::Context::Database {
+                    server,
+                    database,
+                    db_type,
+                } = context.context.clone()
+                {
+                    context.context = parsers::Context::Resource {
+                        server,
+                        database,
+                        db_type,
+                        resource: opts.resource,
+                    }
+                } else {
+                    println!(
+                        "Cannot specify resource without database except from a database context"
+                    );
+                }
+            }
+        },
         Commands::Read(opts) => {
             let metadata = match opts.metadata {
                 Some(metadata) => match metadata.as_str() {
@@ -107,7 +160,44 @@ fn execute_command(command: Commands, sirix: Sirix) {
             };
         }
         Commands::Delete(opts) => {
-            println!("Delete: {}", opts);
+            match opts.opts {
+                DeleteOptsImpl::Scope(types) => match types {
+                    DeleteScopeTypes::Context(scope) => match scope.opts {
+                        parsers::DeleteContextScopesImpl::Database => {
+                            // TODO - need to implement context first
+                        }
+                        parsers::DeleteContextScopesImpl::Resource => {
+                            // TODO - need to implement context first
+                        }
+                        parsers::DeleteContextScopesImpl::Server => match server_delete(sirix) {
+                            Ok(_) => {
+                                println!("deleted all databases");
+                            }
+                            Err(err) => {
+                                println!("failed to delete databases: {}", err);
+                            }
+                        },
+                    },
+                    DeleteScopeTypes::Explicit(scope) => match scope {
+                        parsers::DeleteExplicitScope::Database { database } => {
+                            match database_delete(sirix.json_database(database.clone())) {
+                                Ok(_) => {
+                                    println!("database {} deleted", database);
+                                }
+                                Err(err) => {
+                                    println!("failed to delete database {}: {}", database, err);
+                                }
+                            }
+                        }
+                        parsers::DeleteExplicitScope::Resource { database, resource } => {
+                            // TODO
+                        }
+                    },
+                },
+                DeleteOptsImpl::Node(opts) => {
+                    // TODO
+                }
+            }
         }
         Commands::Info(opts) => match opts.database.to_owned() {
             // TODO: Use context here
@@ -129,10 +219,10 @@ fn execute_command(command: Commands, sirix: Sirix) {
     }
 }
 
-fn parse(line: &std::vec::Vec<&str>, sirix: Sirix) {
+fn parse(line: &std::vec::Vec<&str>, sirix: Sirix, context: &mut parsers::ContextStruct) {
     let result = Commands::try_parse_from(line);
     match result {
-        Ok(command) => execute_command(command, sirix),
+        Ok(command) => execute_command(command, sirix, context),
         Err(err) => {
             println!("{}", err);
         }
@@ -144,7 +234,11 @@ fn repl() {
     let url = rl.readline_with_initial("url: ", ("http://localhost:9443", ""));
     let username = rl.readline_with_initial("username: ", ("admin", ""));
     let password = rl.readline_with_initial("password: ", ("admin", ""));
-    let sirix = create_sirix(&url.unwrap(), &username.unwrap(), &password.unwrap());
+    let url = url.unwrap();
+    let mut context = parsers::ContextStruct {
+        context: parsers::Context::Server(url.clone()),
+    };
+    let sirix = create_sirix(&url, &username.unwrap(), &password.unwrap());
     loop {
         let readline = rl.readline(">> ");
         match readline {
@@ -153,7 +247,7 @@ fn repl() {
                 let parsed = line.split_ascii_whitespace();
                 let mut collected: std::vec::Vec<&str> = parsed.collect();
                 collected.insert(0, "");
-                parse(&collected, sirix.clone());
+                parse(&collected, sirix.clone(), &mut context);
             }
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");

@@ -3,7 +3,7 @@ use clap::Clap;
 #[derive(Clap, Debug)]
 pub struct DeleteOpts {
     #[clap(subcommand)]
-    opts: DeleteOptsImpl,
+    pub opts: DeleteOptsImpl,
 }
 
 impl std::fmt::Display for DeleteOpts {
@@ -68,7 +68,7 @@ impl std::fmt::Display for DeleteNodeOpts {
 #[derive(Clap, Debug)]
 pub struct DeleteContextScopes {
     #[clap(subcommand)]
-    opts: DeleteContextScopesImpl,
+    pub opts: DeleteContextScopesImpl,
 }
 
 impl std::fmt::Display for DeleteContextScopes {

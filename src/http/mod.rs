@@ -4,7 +4,7 @@ pub mod resource;
 pub mod sirix;
 pub mod types;
 
-pub use database::{database_info_json, database_info_xml};
+pub use database::{database_info_json, database_info_xml, database_delete};
 pub use error::handle_error;
 pub use resource::{read_json_resource, read_xml_resource};
-pub use sirix::create_sirix;
+pub use sirix::{create_sirix, server_delete};

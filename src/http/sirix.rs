@@ -1,4 +1,6 @@
 use sirix_rust_client::synchronous::auth::auth;
+use sirix_rust_client::synchronous::client::SirixResponse;
+use sirix_rust_client::synchronous::error::SirixResult;
 use sirix_rust_client::synchronous::sirix::Sirix;
 
 use super::types::JsonResponse;
@@ -21,4 +23,8 @@ pub fn server_info_with_resources(sirix: Sirix) -> JsonResponse {
         Ok(response) => JsonResponse::Ok(response.body),
         Err(err) => JsonResponse::Err(err),
     }
+}
+
+pub fn server_delete(sirix: Sirix) -> SirixResult<SirixResponse<()>> {
+    sirix.delete_all()
 }

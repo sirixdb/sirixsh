@@ -1,5 +1,5 @@
 use sirix_rust_client::{
-    synchronous::database::Database,
+    synchronous::{client::SirixResponse, database::Database, error::SirixResult},
     types::{Json, Xml},
 };
 
@@ -17,4 +17,8 @@ pub fn database_info_xml(database: Database<Xml>) -> XmlResponse {
         Ok(response) => XmlResponse::Ok(response.body),
         Err(err) => XmlResponse::Err(err),
     }
+}
+
+pub fn database_delete<T>(database: Database<T>) -> SirixResult<SirixResponse<()>> {
+    database.delete()
 }
