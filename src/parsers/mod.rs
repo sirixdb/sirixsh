@@ -4,8 +4,8 @@ pub mod info;
 pub mod read;
 
 pub use context::{
-    Context, ContextOpts, ContextOptsImpl, ContextStruct, DatabaseAndResourceOpts, DatabaseOpts,
-    ResourceOpts, get_server_string
+    get_server_string, Context, ContextOpts, ContextOptsImpl, ContextStruct, DatabaseOpts,
+    ResourceOpts,
 };
 pub use delete::{
     DeleteContextScopes, DeleteContextScopesImpl, DeleteExplicitScope, DeleteNodeOpts, DeleteOpts,

@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { git = "https://github.com/clap-rs/clap", rev = "a11ca85e8fd401e07c8330980d0af090a3d35d03"}
+clap = "3.0.0-beta.4"
 rustyline = "8.2.0"
 sirix-rust-client = { git = "https://github.com/sirixdb/sirix-rust-client", rev = "c876e9b6f7ebef9af0e33d6b3dd6f327c2f90bd3", features = ["sync"] }
 ureq = "2.1.1"

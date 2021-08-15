@@ -18,7 +18,7 @@ use std::{error, fmt};
 
 use crate::{
     http::{
-        database_info_xml, handle_error,
+        database_info_xml, format_db_type, handle_error,
         types::{JsonResponse, XmlResponse},
     },
     parsers::delete::{DeleteOptsImpl, DeleteScopeTypes},
@@ -85,36 +85,38 @@ fn execute_command(command: Commands, sirix: Sirix, context: &mut parsers::Conte
                     },
                 }
             }
-            parsers::ContextOptsImpl::DatabaseAndResource(opts) => {
-                context.context = parsers::Context::Resource {
-                    server: parsers::get_server_string(context.context.clone()),
-                    database: opts.database,
-                    db_type: match opts.db_type.as_str() {
-                        "json" => DbType::Json(Json),
-                        _ => DbType::XML(Xml),
-                    },
-                    resource: opts.resource,
-                }
-            }
-            parsers::ContextOptsImpl::Resource(opts) => {
-                if let parsers::Context::Database {
-                    server,
-                    database,
-                    db_type,
-                } = context.context.clone()
-                {
+            parsers::ContextOptsImpl::Resource(opts) => match opts.database {
+                Some(database) => {
                     context.context = parsers::Context::Resource {
+                        server: parsers::get_server_string(context.context.clone()),
+                        database: database,
+                        db_type: match opts.db_type.unwrap().as_str() {
+                            "json" => DbType::Json(Json),
+                            _ => DbType::XML(Xml),
+                        },
+                        resource: opts.resource,
+                    }
+                }
+                None => {
+                    if let parsers::Context::Database {
                         server,
                         database,
                         db_type,
-                        resource: opts.resource,
+                    } = context.context.clone()
+                    {
+                        context.context = parsers::Context::Resource {
+                            server,
+                            database,
+                            db_type,
+                            resource: opts.resource,
+                        }
+                    } else {
+                        println!(
+                                "Cannot specify resource without database except from a database context"
+                            );
                     }
-                } else {
-                    println!(
-                        "Cannot specify resource without database except from a database context"
-                    );
                 }
-            }
+            },
         },
         Commands::Read(opts) => {
             let metadata = match opts.metadata {
@@ -240,7 +242,26 @@ fn repl() {
     };
     let sirix = create_sirix(&url, &username.unwrap(), &password.unwrap());
     loop {
-        let readline = rl.readline(">> ");
+        let prompt = match context.context.clone() {
+            parsers::Context::Database {
+                server: _,
+                database,
+                db_type,
+            } => format!("{} ({}) >> ", database, format_db_type(db_type)),
+            parsers::Context::Resource {
+                server: _,
+                database,
+                db_type,
+                resource,
+            } => format!(
+                "{}/{} ({}) >> ",
+                database,
+                resource,
+                format_db_type(db_type)
+            ),
+            _ => ">> ".to_owned(),
+        };
+        let readline = rl.readline(prompt.as_str());
         match readline {
             Ok(line) => {
                 rl.add_history_entry(line.as_str());

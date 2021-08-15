@@ -53,7 +53,6 @@ impl std::fmt::Display for ReadOpts {
 }
 
 #[derive(Clap, Debug)]
-#[clap(flatten)]
 pub enum RevisionType {
     /// The timestamp of a specific revision to read.
     Timestamp {

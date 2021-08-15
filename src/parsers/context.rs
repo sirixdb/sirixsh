@@ -24,8 +24,8 @@ pub enum Context {
 pub fn get_server_string(context: Context) -> String {
     match context {
         Context::Server(server) => server,
-        Context::Database {server, ..} => server,
-        Context::Resource {server, ..} => server,
+        Context::Database { server, .. } => server,
+        Context::Resource { server, .. } => server,
     }
 }
 
@@ -36,34 +36,24 @@ pub struct ContextOpts {
 }
 
 #[derive(Clap, Debug)]
-#[clap(flatten)]
 pub enum ContextOptsImpl {
     Server,
     Database(DatabaseOpts),
-    DatabaseAndResource(DatabaseAndResourceOpts),
     Resource(ResourceOpts),
 }
 
 #[derive(Clap, Debug)]
 pub struct DatabaseOpts {
-    #[clap(index(1))]
     pub database: String,
-    #[clap(index(2), possible_values = &["json", "xml"], requires("database"))]
+    #[clap(possible_values = &["json", "xml"])]
     pub db_type: String,
-}
-
-#[derive(Clap, Debug)]
-pub struct DatabaseAndResourceOpts {
-    #[clap(index(1))]
-    pub database: String,
-    #[clap(index(2), possible_values = &["json", "xml"], requires("database"))]
-    pub db_type: String,
-    #[clap(index(3))]
-    pub resource: String,
 }
 
 #[derive(Clap, Debug)]
 pub struct ResourceOpts {
-    #[clap(index(1))]
+    #[clap(long, short, requires("database"))]
+    pub database: Option<String>,
+    #[clap(long("type"), short('t'), requires("database"), possible_values = &["json", "xml"])]
+    pub db_type: Option<String>,
     pub resource: String,
 }
